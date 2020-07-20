@@ -32,7 +32,7 @@ class ImageUploadController extends Controller
             }
 
             $request->file('file')->move(public_path() . '/uploads/images/', $imageName);
-            $path = '/uploads/images/'. $imageName;
+            $path = 'uploads/images/'. $imageName;
             // we are updating our image column with the help of user id
             $image = imageUpload::find($imageid);
             $image->update(['image' => $path]);
@@ -61,11 +61,13 @@ class ImageUploadController extends Controller
     //deleting image
     public function deleteImage(imageUpload $image)
     {
-        $image_path = $image->image;  // Value is not URL but directory file path
+        $image_path = $image->image;
         if(File::exists($image_path)) {
             File::delete($image_path);
+            $image->delete(); //delete from database
+            $images = imageUpload::orderBy('updated_at','desc')->get();
+            return view('gallery',compact('images'));
         }
-        $image->delete(); //delete from database
         $images = imageUpload::orderBy('updated_at','desc')->get();
         return view('gallery',compact('images'));
     }
